@@ -3,12 +3,9 @@ package com.example.demo16.fruit.controllers;
 import com.example.demo16.fruit.dao.FruitDAO;
 import com.example.demo16.fruit.dao.impl.FruitDAOImpl;
 import com.example.demo16.fruit.pojo.Fruit;
-import com.example.demo16.myssm.myspringmvc.ViewBaseServlet;
 import com.example.demo16.myssm.util.StringUtil;
 
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
@@ -17,9 +14,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 
-public class FruitController extends ViewBaseServlet {
+public class FruitController  {
     FruitDAO fruit = new FruitDAOImpl();
-    @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         req.setCharacterEncoding("utf-8");
         String oper = req.getParameter("oper");
@@ -41,7 +37,7 @@ public class FruitController extends ViewBaseServlet {
         }
         throw new RuntimeException("oper error");
     }
-    private void index(HttpServletRequest request , HttpServletResponse response)throws IOException, ServletException {
+    private String index(HttpServletRequest request )throws IOException, ServletException {
         int page = 1;
         String oper = request.getParameter("oper");
         // 如果oper不为空则是通过表单的查询按钮过来的,如果oper为空则不是通过按键过来的
@@ -79,9 +75,9 @@ public class FruitController extends ViewBaseServlet {
         //逻辑视图名称 ：   index
         //物理视图名称 ：   view-prefix + 逻辑视图名称 + view-suffix
         //所以真实的视图名称是：      /       index       .html
-        super.processTemplate("index",request,response);
+        return "index";
     }
-    private void add(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    private String add(HttpServletRequest req) throws IOException {
         req.setCharacterEncoding("utf-8");
         String fname = req.getParameter("fname");
         String price = req.getParameter("price");
@@ -90,26 +86,28 @@ public class FruitController extends ViewBaseServlet {
         int pri = Integer.parseInt(price);
         int count = Integer.parseInt(fcount);
         fruit.addFruit(new Fruit(0,fname,pri,count,remark));
-        resp.sendRedirect("fruit.do");
+        return "redirect:fruit.do";
     }
-    private void delete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    private String delete(HttpServletRequest req)  {
         String fid = req.getParameter("fid");
         if (StringUtil.isNotEmpty(fid)) {
             int fid1 = Integer.parseInt(fid);
             fruit.delFruit(fid1);
-            resp.sendRedirect("fruit.do");
+            return "redirect:fruit.do";
         }
+        return null;
     }
-    private void edit(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    private String edit(HttpServletRequest req) {
         String fid = req.getParameter("fid");
         if (StringUtil.isNotEmpty(fid)) {
             int fid1 = Integer.parseInt(fid);
             Fruit fruitByFid = fruit.getFruitByFid(fid1);
             req.setAttribute("fruit",fruitByFid);
-            super.processTemplate("edit",req,resp);
+            return "edit";
         }
+        return "error";
     }
-    private String update(HttpServletRequest req, HttpServletResponse resp) {
+    private String update(HttpServletRequest req) {
         // 获取参数
         String fname = req.getParameter("fname");
         String price = req.getParameter("price");

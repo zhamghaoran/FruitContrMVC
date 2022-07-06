@@ -26,9 +26,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 @WebServlet("*.do")
-public class DispatcherServlet extends ViewBaseServlet{
+public class DispatcherServlet extends ViewBaseServlet {
     private Map<String, Object> BeanMap = new HashMap<>();
     public void init() {
+        super.init();
         //InputStream resourceAsStream = getClass().getClassLoader().getResourceAsStream("applicationContext.xml");
         FileInputStream fileInputStream = null;
         try {
@@ -63,6 +64,11 @@ public class DispatcherServlet extends ViewBaseServlet{
                 String BeanId = beanElement.getAttribute("id");
                 String ClassName = beanElement.getAttribute("class");
                 Object o = null;
+                try {
+                    o = Class.forName(ClassName).newInstance();
+                } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
                 BeanMap.put(BeanId,o);
             }
         }
@@ -83,14 +89,16 @@ public class DispatcherServlet extends ViewBaseServlet{
             oper = "index";
         }
         try {
-            Method declaredMethod = controllerobj.getClass().getDeclaredMethod(oper, HttpServletRequest.class, HttpServletResponse.class);
+            Method declaredMethod = controllerobj.getClass().getDeclaredMethod(oper, HttpServletRequest.class);
             if (declaredMethod != null) {
                 declaredMethod.setAccessible(true);
-                Object Methodretuern = declaredMethod.invoke(controllerobj,req,resp);
+                Object Methodretuern = declaredMethod.invoke(controllerobj,req);
                 String methodreturn = (String) Methodretuern;
                 if (methodreturn.startsWith("redirect:")) {
                     String redirectStr = methodreturn.substring("redirect:".length());
                     resp.sendRedirect(redirectStr);
+                } else {
+                    super.processTemplate(methodreturn,req,resp); // 返回的就是一个edit
                 }
             } else {
                 throw new RuntimeException("oper error");
