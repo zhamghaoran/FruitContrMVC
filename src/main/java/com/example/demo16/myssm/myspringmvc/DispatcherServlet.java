@@ -1,5 +1,6 @@
 package com.example.demo16.myssm.myspringmvc;
 
+import com.example.demo16.myssm.util.StringUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -15,6 +16,8 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -52,8 +55,24 @@ public class DispatcherServlet extends ViewBaseServlet{
         String substring = servletPath.substring(1);
         int i = substring.lastIndexOf(".do");
         String substring1 = substring.substring(0, i);
+        Object controllerobj = BeanMap.get(substring1);
 
-        //System.out.println(substring1);
+        String oper = req.getParameter("oper");
+        if (StringUtil.isEmpty(oper)) {
+            oper = "index";
+        }
 
+        try {
+            Method declaredMethod = controllerobj.getClass().getDeclaredMethod(oper, HttpServletRequest.class, HttpServletResponse.class);
+            if (declaredMethod != null) {
+                declaredMethod.setAccessible(true);
+                declaredMethod.invoke(controllerobj,req,resp);
+            } else {
+                throw new RuntimeException("oper error");
+            }
+
+        } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+                throw new RuntimeException(e);
+        }
     }
 }
