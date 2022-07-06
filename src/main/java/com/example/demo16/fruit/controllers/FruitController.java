@@ -6,6 +6,7 @@ import com.example.demo16.fruit.pojo.Fruit;
 import com.example.demo16.myssm.myspringmvc.ViewBaseServlet;
 import com.example.demo16.myssm.util.StringUtil;
 
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -18,6 +19,7 @@ import java.util.List;
 
 public class FruitController extends ViewBaseServlet {
     FruitDAO fruit = new FruitDAOImpl();
+    private ServletContext servletContext;
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         req.setCharacterEncoding("utf-8");

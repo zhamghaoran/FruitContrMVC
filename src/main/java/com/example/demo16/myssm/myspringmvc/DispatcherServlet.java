@@ -14,8 +14,9 @@ import javax.servlet.http.HttpServletResponse;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -24,14 +25,15 @@ import java.util.Map;
 @WebServlet("*.do")
 public class DispatcherServlet extends ViewBaseServlet{
     private Map<String, Object> BeanMap = new HashMap<>();
-    public DispatcherServlet() throws ParserConfigurationException, IOException, SAXException, ClassNotFoundException, InstantiationException, IllegalAccessException {
-        InputStream resourceAsStream = getClass().getClassLoader().getResourceAsStream("application.xml");
+    public DispatcherServlet() throws ParserConfigurationException, IOException, SAXException, ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchFieldException {
+        //InputStream resourceAsStream = getClass().getClassLoader().getResourceAsStream("applicationContext.xml");
+        FileInputStream fileInputStream = new FileInputStream("C:\\Users\\20179\\IdeaProjects\\demo16\\src\\applicationContext.xml");
         // 创建documentBuilderFactory对象
         DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
         // 创建documentBuilder对象
         DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
         // 获取document对象
-        Document document = documentBuilder.parse(resourceAsStream);
+        Document document = documentBuilder.parse(fileInputStream);
         // 获取所有的bean节点
         NodeList beanNodeList = document.getElementsByTagName("bean");
         for(int i = 0;i < beanNodeList.getLength();i ++) {
@@ -41,6 +43,9 @@ public class DispatcherServlet extends ViewBaseServlet{
                 String BeanId = beanElement.getAttribute("id");
                 String ClassName = beanElement.getAttribute("class");
                 Object o = Class.forName(ClassName).newInstance();
+                Field servletContext = Class.forName(ClassName).getDeclaredField("servletContext");
+                servletContext.setAccessible(true);
+                servletContext.set(o,this.getServletContext());
                 BeanMap.put(BeanId,o);
             }
         }
@@ -56,12 +61,10 @@ public class DispatcherServlet extends ViewBaseServlet{
         int i = substring.lastIndexOf(".do");
         String substring1 = substring.substring(0, i);
         Object controllerobj = BeanMap.get(substring1);
-
         String oper = req.getParameter("oper");
         if (StringUtil.isEmpty(oper)) {
             oper = "index";
         }
-
         try {
             Method declaredMethod = controllerobj.getClass().getDeclaredMethod(oper, HttpServletRequest.class, HttpServletResponse.class);
             if (declaredMethod != null) {
