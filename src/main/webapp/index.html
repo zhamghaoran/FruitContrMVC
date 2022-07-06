@@ -10,7 +10,7 @@
 				<p class="center f30">欢迎使用水果库存后台管理系统</p>
 				<div style="border: 0px solid red ;width: 80%;margin-left: 10%;text-align: right" >
 					<form th:action="@{/fruit.do}" method="post" style="float: left;width:70%;margin-left:14% ">
-						<input type="hidden" name="oper" value="search">
+						<input type="hidden" name="oper" value="index">
 						请输入查询关键字：<input type="text" name="keyword"th:value="${session.keyword}">
 						<input type="submit" value="查询" class="btn">
 					</form>

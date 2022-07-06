@@ -12,7 +12,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
-import java.nio.file.Files;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.List;
 
 @WebServlet("/fruit.do")
@@ -25,9 +26,16 @@ public class FruitServlet extends ViewBaseServlet {
         if (StringUtil.isEmpty(oper)) {
             oper = "index";
         }
-        if("search".equals(oper)) {
-            index(req, resp);
-            return;
+        Method[] Methods = this.getClass().getDeclaredMethods(); // 获取当前类中的所有方法
+        for( Method m : Methods) {
+            String name = m.getName();
+            if (oper.equals(name)) {  // 找到和oper同名的方法
+                try {
+                    m.invoke(this,req,resp);
+                } catch (IllegalAccessException | InvocationTargetException e) {
+                    throw new RuntimeException(e);
+                }
+            }
         }
         switch (oper) {
             case "index":
