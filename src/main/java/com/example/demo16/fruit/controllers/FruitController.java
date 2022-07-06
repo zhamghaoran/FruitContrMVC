@@ -1,4 +1,4 @@
-package com.example.demo16.fruit.controlers;
+package com.example.demo16.fruit.controllers;
 
 import com.example.demo16.fruit.dao.FruitDAO;
 import com.example.demo16.fruit.dao.impl.FruitDAOImpl;
@@ -16,8 +16,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 
-@WebServlet("/fruit.do")
-public class FruitControler extends ViewBaseServlet {
+public class FruitController extends ViewBaseServlet {
     FruitDAO fruit = new FruitDAOImpl();
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
