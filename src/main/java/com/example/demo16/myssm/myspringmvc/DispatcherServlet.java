@@ -7,6 +7,8 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
+import javax.servlet.ServletConfig;
+import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -15,6 +17,7 @@ import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -25,15 +28,32 @@ import java.util.Map;
 @WebServlet("*.do")
 public class DispatcherServlet extends ViewBaseServlet{
     private Map<String, Object> BeanMap = new HashMap<>();
-    public DispatcherServlet() throws ParserConfigurationException, IOException, SAXException, ClassNotFoundException, InstantiationException, IllegalAccessException, NoSuchFieldException {
+    public void init() {
         //InputStream resourceAsStream = getClass().getClassLoader().getResourceAsStream("applicationContext.xml");
-        FileInputStream fileInputStream = new FileInputStream("C:\\Users\\20179\\IdeaProjects\\demo16\\src\\applicationContext.xml");
+        FileInputStream fileInputStream = null;
+        try {
+            fileInputStream = new FileInputStream("C:\\Users\\20179\\IdeaProjects\\demo16\\src\\applicationContext.xml");
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         // 创建documentBuilderFactory对象
         DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
         // 创建documentBuilder对象
-        DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+        DocumentBuilder documentBuilder = null;
+        try {
+            documentBuilder = documentBuilderFactory.newDocumentBuilder();
+        } catch (ParserConfigurationException e) {
+            throw new RuntimeException(e);
+        }
         // 获取document对象
-        Document document = documentBuilder.parse(fileInputStream);
+        Document document = null;
+        try {
+            document = documentBuilder.parse(fileInputStream);
+        } catch (SAXException e) {
+            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
         // 获取所有的bean节点
         NodeList beanNodeList = document.getElementsByTagName("bean");
         for(int i = 0;i < beanNodeList.getLength();i ++) {
@@ -42,10 +62,25 @@ public class DispatcherServlet extends ViewBaseServlet{
                 Element beanElement = (Element) beannode;
                 String BeanId = beanElement.getAttribute("id");
                 String ClassName = beanElement.getAttribute("class");
-                Object o = Class.forName(ClassName).newInstance();
-                Field servletContext = Class.forName(ClassName).getDeclaredField("servletContext");
-                servletContext.setAccessible(true);
-                servletContext.set(o,this.getServletContext());
+                Method setServletContext;
+                try {
+                    setServletContext = Class.forName(ClassName).getDeclaredMethod("setServletContext", ServletContext.class);
+
+                } catch (NoSuchMethodException | ClassNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
+                Object o = null;
+                try {
+                    o = Class.forName(ClassName).newInstance();
+
+                } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
+                try {
+                    setServletContext.invoke(o,this.getServletContext());
+                } catch (IllegalAccessException | InvocationTargetException e) {
+                    throw new RuntimeException(e);
+                }
                 BeanMap.put(BeanId,o);
             }
         }

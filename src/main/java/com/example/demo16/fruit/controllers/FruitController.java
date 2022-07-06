@@ -20,6 +20,12 @@ import java.util.List;
 public class FruitController extends ViewBaseServlet {
     FruitDAO fruit = new FruitDAOImpl();
     private ServletContext servletContext;
+
+    public void setServletContext(ServletContext servletContext) {
+        this.servletContext = servletContext;
+        super.init(servletContext);
+    }
+
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         req.setCharacterEncoding("utf-8");
