@@ -13,11 +13,11 @@ import java.io.IOException;
 public class ViewBaseServlet extends HttpServlet {
 
     private TemplateEngine templateEngine;
-    private ServletContext servletContext;
-    public void init(ServletContext servletContext) {
-        this.servletContext = servletContext;
+
+    @Override
+    public void init() {
         // 1.获取ServletContext对象
-        //ServletContext servletContext = this.getServletContext();
+        ServletContext servletContext = this.getServletContext();
         // 2.创建Thymeleaf解析器对象
         ServletContextTemplateResolver templateResolver = new ServletContextTemplateResolver(servletContext);
         // 3.给解析器对象设置参数
@@ -45,7 +45,7 @@ public class ViewBaseServlet extends HttpServlet {
         // 1.设置响应体内容类型和字符集
         resp.setContentType("text/html;charset=UTF-8");
         // 2.创建WebContext对象
-        WebContext webContext = new WebContext(req, resp, this.servletContext);
+        WebContext webContext = new WebContext(req, resp, getServletContext());
         // 3.处理模板数据
         templateEngine.process(templateName, webContext, resp.getWriter());
     }

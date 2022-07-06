@@ -62,25 +62,7 @@ public class DispatcherServlet extends ViewBaseServlet{
                 Element beanElement = (Element) beannode;
                 String BeanId = beanElement.getAttribute("id");
                 String ClassName = beanElement.getAttribute("class");
-                Method setServletContext;
-                try {
-                    setServletContext = Class.forName(ClassName).getDeclaredMethod("setServletContext", ServletContext.class);
-
-                } catch (NoSuchMethodException | ClassNotFoundException e) {
-                    throw new RuntimeException(e);
-                }
                 Object o = null;
-                try {
-                    o = Class.forName(ClassName).newInstance();
-
-                } catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
-                    throw new RuntimeException(e);
-                }
-                try {
-                    setServletContext.invoke(o,this.getServletContext());
-                } catch (IllegalAccessException | InvocationTargetException e) {
-                    throw new RuntimeException(e);
-                }
                 BeanMap.put(BeanId,o);
             }
         }
@@ -104,7 +86,12 @@ public class DispatcherServlet extends ViewBaseServlet{
             Method declaredMethod = controllerobj.getClass().getDeclaredMethod(oper, HttpServletRequest.class, HttpServletResponse.class);
             if (declaredMethod != null) {
                 declaredMethod.setAccessible(true);
-                declaredMethod.invoke(controllerobj,req,resp);
+                Object Methodretuern = declaredMethod.invoke(controllerobj,req,resp);
+                String methodreturn = (String) Methodretuern;
+                if (methodreturn.startsWith("redirect:")) {
+                    String redirectStr = methodreturn.substring("redirect:".length());
+                    resp.sendRedirect(redirectStr);
+                }
             } else {
                 throw new RuntimeException("oper error");
             }

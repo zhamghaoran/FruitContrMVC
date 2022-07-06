@@ -19,13 +19,6 @@ import java.util.List;
 
 public class FruitController extends ViewBaseServlet {
     FruitDAO fruit = new FruitDAOImpl();
-    private ServletContext servletContext;
-
-    public void setServletContext(ServletContext servletContext) {
-        this.servletContext = servletContext;
-        super.init(servletContext);
-    }
-
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         req.setCharacterEncoding("utf-8");
@@ -116,9 +109,7 @@ public class FruitController extends ViewBaseServlet {
             super.processTemplate("edit",req,resp);
         }
     }
-    private void update(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        // 设置编码
-        req.setCharacterEncoding("utf-8");
+    private String update(HttpServletRequest req, HttpServletResponse resp) {
         // 获取参数
         String fname = req.getParameter("fname");
         String price = req.getParameter("price");
@@ -130,11 +121,7 @@ public class FruitController extends ViewBaseServlet {
         int fid1 = Integer.parseInt(fid);
         // 执行更新
         fruit.UpdataFruit(new Fruit(fid1,fname,price1,count,remark));
-        // 资源跳转
-
-        //super.processTemplate("index",req,resp);
-        // req.getDispatchar("index.html").forward(req,resp);
         // 此处需要重定向，目的是重新给IndexServlet发请求，重新获取FruitList，然后覆盖到Session中，这样首页上显示的session中的数据才是最新的
-        resp.sendRedirect("fruit.do");
+        return "redirect:fruit.do";
     }
 }
