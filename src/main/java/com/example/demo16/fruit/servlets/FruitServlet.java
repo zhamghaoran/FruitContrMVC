@@ -31,31 +31,15 @@ public class FruitServlet extends ViewBaseServlet {
             String name = m.getName();
             if (oper.equals(name)) {  // 找到和oper同名的方法
                 try {
+                    m.setAccessible(true);
                     m.invoke(this,req,resp);
+                    return;
                 } catch (IllegalAccessException | InvocationTargetException e) {
                     throw new RuntimeException(e);
                 }
             }
         }
-        switch (oper) {
-            case "index":
-                index(req, resp);
-                break;
-            case "add" :
-                add(req, resp);
-                break;
-            case "delete":
-                delete(req, resp);
-                break;
-            case "edit":
-                edit(req, resp);
-                break;
-            case "update":
-                update(req, resp);
-                break;
-            default:
-                System.out.println(oper);
-        }
+        throw new RuntimeException("oper error");
     }
     private void index(HttpServletRequest request , HttpServletResponse response)throws IOException, ServletException {
         int page = 1;
