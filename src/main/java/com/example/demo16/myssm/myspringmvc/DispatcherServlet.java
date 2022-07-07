@@ -109,8 +109,16 @@ public class DispatcherServlet extends ViewBaseServlet {
                         } else {
                             // 从请求中获取参数值
                             String parameterValue = req.getParameter(parameterName);
-                            parameterValues[i] = parameterValue;
+                            String typename = parameter.getType().getName();
+                            Object parameterObj = parameterValue;
+                            if (parameterObj != null) {
+                                if ("java.lang.Integer".equals(typename)) {
+                                    parameterObj = Integer.parseInt(parameterValue);
+                                }
+                            }
+                            parameterValues[i] = parameterObj;
                         }
+
                     }
                     m.setAccessible(true);
                     Object Methodretuern = m.invoke(controllerobj,parameterValues);

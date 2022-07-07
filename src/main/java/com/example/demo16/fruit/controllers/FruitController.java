@@ -17,33 +17,12 @@ import java.util.List;
 
 public class FruitController  {
     FruitDAO fruit = new FruitDAOImpl();
-    protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        req.setCharacterEncoding("utf-8");
-        String oper = req.getParameter("oper");
-        if (StringUtil.isEmpty(oper)) {
-            oper = "index";
-        }
-        Method[] Methods = this.getClass().getDeclaredMethods(); // 获取当前类中的所有方法
-        for( Method m : Methods) {
-            String name = m.getName();
-            if (oper.equals(name)) {  // 找到和oper同名的方法
-                try {
-                    m.setAccessible(true);
-                    m.invoke(this,req,resp);
-                    return;
-                } catch (IllegalAccessException | InvocationTargetException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        }
-        throw new RuntimeException("oper error");
-    }
-    private String index(String oper, String keyword, Integer page, HttpServletRequest request ) {
+    private String index(String oper, String keyword, Integer pageNo, HttpServletRequest request ) {
         HttpSession session = request.getSession();
-        if (page == null)
-            page = 1;
+        if (pageNo == null)
+            pageNo = 1;
         if (StringUtil.isNotEmpty(oper) && "search".equals(oper)) {
-            page = 1;
+            pageNo = 1;
             if (StringUtil.isEmpty(keyword))
                 keyword = "";
             session.setAttribute("keyword",keyword);
@@ -55,9 +34,9 @@ public class FruitController  {
                 keyword = "";
             }
         }
-        session.setAttribute("pageNo",page);
+        session.setAttribute("pageNo",pageNo);
         FruitDAOImpl fruitDAO = new FruitDAOImpl();
-        List<Fruit> fruitList = fruitDAO.getFruitList(keyword,page);
+        List<Fruit> fruitList = fruitDAO.getFruitList(keyword,pageNo);
         Long fruitCount = fruitDAO.getFruitCount(keyword);
         Long pageCount = (fruitCount + 5 - 1) / 5;
         session.setAttribute("pageCount",pageCount);
