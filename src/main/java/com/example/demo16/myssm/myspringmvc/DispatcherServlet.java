@@ -7,8 +7,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import javax.servlet.ServletConfig;
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -19,7 +17,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -54,9 +51,7 @@ public class DispatcherServlet extends ViewBaseServlet {
         Document document = null;
         try {
             document = documentBuilder.parse(fileInputStream);
-        } catch (SAXException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
+        } catch (SAXException | IOException e) {
             throw new RuntimeException(e);
         }
         // 获取所有的bean节点
@@ -78,7 +73,7 @@ public class DispatcherServlet extends ViewBaseServlet {
         }
     }
     @Override
-    protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+    protected void service(HttpServletRequest req, HttpServletResponse resp) throws IOException {
         req.setCharacterEncoding("utf-8");
         // 假设url是 ：http://localhost:8080/hello.do
         // 那么ServletPath是：/hello.do

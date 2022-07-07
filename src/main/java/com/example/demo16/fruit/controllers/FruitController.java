@@ -5,14 +5,8 @@ import com.example.demo16.fruit.dao.impl.FruitDAOImpl;
 import com.example.demo16.fruit.pojo.Fruit;
 import com.example.demo16.myssm.util.StringUtil;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import java.beans.IntrospectionException;
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.List;
 
 public class FruitController  {
