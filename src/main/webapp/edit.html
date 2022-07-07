@@ -8,7 +8,7 @@
     <div id="div_fruit_list">
         <p class="center f30">编辑库存信息</p>
         <form th:action="@{/fruit.do}" method="post" th:object="${fruit}">
-            <input type="hidden" name="oper" value="update">
+            <input type="hidden" name="operate" value="update">
             <!--隐藏域 功能类似于文本框，他的值会随着的表单的发送也会发送给服务器，用户是看不到的-->
             <input type="hidden" name="fid" th:value="*{fid}">
             <table id="tbl_fruit">

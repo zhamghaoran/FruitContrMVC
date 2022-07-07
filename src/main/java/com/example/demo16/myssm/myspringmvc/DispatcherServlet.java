@@ -29,6 +29,9 @@ import java.util.Map;
 @WebServlet("*.do")
 public class DispatcherServlet extends ViewBaseServlet {
     private Map<String, Object> BeanMap = new HashMap<>();
+    public DispatcherServlet() {
+
+    }
     public void init() {
         super.init();
         //InputStream resourceAsStream = getClass().getClassLoader().getResourceAsStream("applicationContext.xml");
@@ -84,8 +87,11 @@ public class DispatcherServlet extends ViewBaseServlet {
         String substring = servletPath.substring(1);
         int j = substring.lastIndexOf(".do");
         String substring1 = substring.substring(0, j);
+
         Object controllerobj = BeanMap.get(substring1);
-        String oper = req.getParameter("oper");
+
+        String oper = req.getParameter("operate");
+        //System.out.println(req.getParameter("keyword"));
         if (StringUtil.isEmpty(oper)) {
             oper = "index";
         }
@@ -93,6 +99,7 @@ public class DispatcherServlet extends ViewBaseServlet {
             Method[] declaredMethods = controllerobj.getClass().getDeclaredMethods();
             for(Method m : declaredMethods) {
                 if (oper.equals(m.getName())) {
+
                     Parameter[] parameters = m.getParameters();
                     // parameterValues用来存放参数的值
                     Object[] parameterValues = new Object[parameters.length];

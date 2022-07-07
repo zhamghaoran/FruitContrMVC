@@ -10,8 +10,8 @@
 				<p class="center f30">欢迎使用水果库存后台管理系统</p>
 				<div style="border: 0px solid red ;width: 80%;margin-left: 10%;text-align: right" >
 					<form th:action="@{/fruit.do}" method="post" style="float: left;width:70%;margin-left:14% ">
-						<input type="hidden" name="oper" value="index">
-						请输入查询关键字：<input type="text" name="keyword"th:value="${session.keyword}">
+						<input type="hidden" name="oper" value="search">
+						请输入查询关键字：<input type="text" name="keyword" th:value="${session.keyword}">
 						<input type="submit" value="查询" class="btn">
 					</form>
 					<a th:href="@{/add.html}" style="border: 0px solid blue;margin-bottom: 4px">添加新库存记录</a>
@@ -28,7 +28,7 @@
 					</tr>
 					<tr th:unless="${#lists.isEmpty(session.fruitList)}" th:each="fruit : ${session.fruitList}">
 <!--						<td > <a th:text="${fruit.fname}" th:href="@{'/edit.do?fid='+${fruit.fid}}">苹果 </a> </td>-->
-						<td><a th:text="${fruit.fname}" th:href="@{/fruit.do(fid=${fruit.fid},oper='edit')}">苹果 </a></td>
+						<td><a th:text="${fruit.fname}" th:href="@{/fruit.do(fid=${fruit.fid},operate='edit')}">苹果 </a></td>
 						<td th:text="${fruit.price}">5</td>
 						<td th:text="${fruit.fcount}">20</td>
 <!--						<td><img src="imgs/del.jpg" class="delImg" th:onclick="'delFruit('+${fruit.fid}')'"/></td>-->

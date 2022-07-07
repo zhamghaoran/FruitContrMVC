@@ -26,7 +26,8 @@ public class FruitController  {
             if (StringUtil.isEmpty(keyword))
                 keyword = "";
             session.setAttribute("keyword",keyword);
-        } else {
+            }
+        else {
             Object keyword1 = session.getAttribute("keyword");
             if (keyword1 != null) {
                 keyword = (String) keyword1;
@@ -34,6 +35,7 @@ public class FruitController  {
                 keyword = "";
             }
         }
+        session.setAttribute("keyword",keyword);
         session.setAttribute("pageNo",pageNo);
         FruitDAOImpl fruitDAO = new FruitDAOImpl();
         List<Fruit> fruitList = fruitDAO.getFruitList(keyword,pageNo);
@@ -53,7 +55,7 @@ public class FruitController  {
         fruit.addFruit(new Fruit(0,fname,price,fcount,remark));
         return "redirect:fruit.do";
     }
-    private String delete(Integer fid)  {
+    private String del(Integer fid)  {
         if (fid != null) {
             fruit.delFruit(fid);
             return "redirect:fruit.do";
