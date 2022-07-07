@@ -9,6 +9,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+import java.beans.IntrospectionException;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -37,24 +38,16 @@ public class FruitController  {
         }
         throw new RuntimeException("oper error");
     }
-    private String index(HttpServletRequest request )throws IOException, ServletException {
-        int page = 1;
-        String oper = request.getParameter("oper");
-        // 如果oper不为空则是通过表单的查询按钮过来的,如果oper为空则不是通过按键过来的
-        String keyword = null;
+    private String index(String oper, String keyword, Integer page, HttpServletRequest request ) {
         HttpSession session = request.getSession();
-        if (StringUtil.isNotEmpty(oper) && "search".equals(oper)) {  // 说明我是通过表单过来的，pageno变为1，keyword从请求参数中获取
+        if (page == null)
             page = 1;
-            keyword = request.getParameter("keyword");
+        if (StringUtil.isNotEmpty(oper) && "search".equals(oper)) {
+            page = 1;
             if (StringUtil.isEmpty(keyword))
                 keyword = "";
             session.setAttribute("keyword",keyword);
         } else {
-            // 说明此处不是点击表单查询发送过来的请求，此时keyword应从session中获取
-            String pageNo = request.getParameter("pageNo");
-            if (StringUtil.isNotEmpty(pageNo)) {
-                page = Integer.parseInt(pageNo);
-            }
             Object keyword1 = session.getAttribute("keyword");
             if (keyword1 != null) {
                 keyword = (String) keyword1;
@@ -77,48 +70,28 @@ public class FruitController  {
         //所以真实的视图名称是：      /       index       .html
         return "index";
     }
-    private String add(HttpServletRequest req) throws IOException {
-        req.setCharacterEncoding("utf-8");
-        String fname = req.getParameter("fname");
-        String price = req.getParameter("price");
-        String fcount = req.getParameter("fcount");
-        String remark = req.getParameter("remark");
-        int pri = Integer.parseInt(price);
-        int count = Integer.parseInt(fcount);
-        fruit.addFruit(new Fruit(0,fname,pri,count,remark));
+    private String add(String fname,Integer price ,Integer fcount ,String remark)  {
+        fruit.addFruit(new Fruit(0,fname,price,fcount,remark));
         return "redirect:fruit.do";
     }
-    private String delete(HttpServletRequest req)  {
-        String fid = req.getParameter("fid");
-        if (StringUtil.isNotEmpty(fid)) {
-            int fid1 = Integer.parseInt(fid);
-            fruit.delFruit(fid1);
+    private String delete(Integer fid)  {
+        if (fid != null) {
+            fruit.delFruit(fid);
             return "redirect:fruit.do";
         }
-        return null;
+        return "error";
     }
-    private String edit(HttpServletRequest req) {
-        String fid = req.getParameter("fid");
-        if (StringUtil.isNotEmpty(fid)) {
-            int fid1 = Integer.parseInt(fid);
-            Fruit fruitByFid = fruit.getFruitByFid(fid1);
-            req.setAttribute("fruit",fruitByFid);
+    private String edit(Integer fid ,HttpServletRequest request) {
+        if (fid != null) {
+            Fruit fruitByFid = fruit.getFruitByFid(fid);
+            request.setAttribute("fruit",fruitByFid);
             return "edit";
         }
         return "error";
     }
-    private String update(HttpServletRequest req) {
-        // 获取参数
-        String fname = req.getParameter("fname");
-        String price = req.getParameter("price");
-        int price1 = Integer.parseInt(price);
-        String fcount = req.getParameter("fcount");
-        int count = Integer.parseInt(fcount);
-        String remark = req.getParameter("remark");
-        String fid = req.getParameter("fid");
-        int fid1 = Integer.parseInt(fid);
+    private String update(Integer fid,String fname ,Integer price ,Integer fcount ,String remark) {
         // 执行更新
-        fruit.UpdataFruit(new Fruit(fid1,fname,price1,count,remark));
+        fruit.UpdataFruit(new Fruit(fid,fname,price,fcount,remark));
         // 此处需要重定向，目的是重新给IndexServlet发请求，重新获取FruitList，然后覆盖到Session中，这样首页上显示的session中的数据才是最新的
         return "redirect:fruit.do";
     }

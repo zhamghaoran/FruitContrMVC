@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -81,30 +82,48 @@ public class DispatcherServlet extends ViewBaseServlet {
         // 我的思路是第一步/hello.do --> hello
         String servletPath = req.getServletPath();
         String substring = servletPath.substring(1);
-        int i = substring.lastIndexOf(".do");
-        String substring1 = substring.substring(0, i);
+        int j = substring.lastIndexOf(".do");
+        String substring1 = substring.substring(0, j);
         Object controllerobj = BeanMap.get(substring1);
         String oper = req.getParameter("oper");
         if (StringUtil.isEmpty(oper)) {
             oper = "index";
         }
         try {
-            Method declaredMethod = controllerobj.getClass().getDeclaredMethod(oper, HttpServletRequest.class);
-            if (declaredMethod != null) {
-                declaredMethod.setAccessible(true);
-                Object Methodretuern = declaredMethod.invoke(controllerobj,req);
-                String methodreturn = (String) Methodretuern;
-                if (methodreturn.startsWith("redirect:")) {
-                    String redirectStr = methodreturn.substring("redirect:".length());
-                    resp.sendRedirect(redirectStr);
-                } else {
-                    super.processTemplate(methodreturn,req,resp); // 返回的就是一个edit
+            Method[] declaredMethods = controllerobj.getClass().getDeclaredMethods();
+            for(Method m : declaredMethods) {
+                if (oper.equals(m.getName())) {
+                    Parameter[] parameters = m.getParameters();
+                    // parameterValues用来存放参数的值
+                    Object[] parameterValues = new Object[parameters.length];
+                    for(int i = 0;i < parameters.length;i ++) {
+                        Parameter parameter = parameters[i];
+                        String parameterName = parameter.getName();
+                        // 如果参数名为req ，resp，session 那么就不是通过请求中获取参数值
+                        if ("request".equals(parameterName)) {
+                            parameterValues[i] = req;
+                        } else if ("resp".equals(parameterName)){
+                            parameterValues[i] = resp;
+                        } else if ("session".equals(parameterName)) {
+                            parameterValues[i] = req.getSession();
+                        } else {
+                            // 从请求中获取参数值
+                            String parameterValue = req.getParameter(parameterName);
+                            parameterValues[i] = parameterValue;
+                        }
+                    }
+                    m.setAccessible(true);
+                    Object Methodretuern = m.invoke(controllerobj,parameterValues);
+                    String methodreturn = (String) Methodretuern;
+                    if (methodreturn.startsWith("redirect:")) {
+                        String redirectStr = methodreturn.substring("redirect:".length());
+                        resp.sendRedirect(redirectStr);
+                    } else {
+                        super.processTemplate(methodreturn,req,resp); // 返回的就是一个edit
+                    }
                 }
-            } else {
-                throw new RuntimeException("oper error");
             }
-
-        } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
+        } catch (InvocationTargetException | IllegalAccessException e) {
                 throw new RuntimeException(e);
         }
     }
